@@ -1,0 +1,14 @@
+syntax = "proto3";
+package protobuf;
+
+service Master {
+  rpc DoRegister (RegisterRequest) returns (RegisterResult) {}
+}
+
+message RegisterRequest {
+  string apiKey = 1;
+}
+
+message RegisterResult {
+  string message = 1;
+}
