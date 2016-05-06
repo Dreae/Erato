@@ -3,10 +3,12 @@ package main
 import (
   "net"
   "log"
+  "fmt"
+  "net/http"
 
   "google.golang.org/grpc"
   "golang.org/x/net/context"
-  pb "github.com/dreae/erato/protobuf"
+  pb "github.com/dreae/erebus/protobuf"
 )
 
 type server struct{}
@@ -23,5 +25,10 @@ func main() {
 
   s := grpc.NewServer()
   pb.RegisterMasterServer(s, &server{})
-  s.Serve(lis)
+  go s.Serve(lis)
+
+  http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Hello world")
+  })
+  http.ListenAndServe(":8080", nil)
 }
