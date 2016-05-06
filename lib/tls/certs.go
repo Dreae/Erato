@@ -9,10 +9,22 @@ import (
   "crypto/x509/pkix"
 )
 
+type SerialNumberFunc func(string) *big.Int
+
 type CertificateAuthority struct {
-  CACert *x509.Certificate
-  Orangization string
-  GetSerialNumber func(string) *big.Int
+  caCert *x509.Certificate
+  caKey *rsa.PrivateKey
+  Organization string
+  GetSerialNumber SerialNumberFunc
+}
+
+func NewCertificateAuthority(cert *x509.Certificate, key *rsa.PrivateKey, organization string, getSerialNumber SerialNumberFunc) *CertificateAuthority {
+  return &CertificateAuthority{
+    caCert: cert,
+    caKey: key,
+    Organization: organization,
+    GetSerialNumber: getSerialNumber,
+  }
 }
 
 func (ca *CertificateAuthority) IssueCertificate(instance_id string) (privateKey, certificate []byte, err error) {
@@ -25,7 +37,7 @@ func (ca *CertificateAuthority) IssueCertificate(instance_id string) (privateKey
     IsCA: false,
     SerialNumber: ca.GetSerialNumber(instance_id),
     Subject: pkix.Name{
-      Organization: []string{ca.Orangization},
+      Organization: []string{ca.Organization},
       OrganizationalUnit: []string{instance_id},
     },
     ExtKeyUsage: []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
@@ -33,7 +45,7 @@ func (ca *CertificateAuthority) IssueCertificate(instance_id string) (privateKey
     NotAfter: time.Now().AddDate(100, 0, 0),
   }
 
-  cert, err := x509.CreateCertificate(rand.Reader, template, ca.CACert, &key.PublicKey, key)
+  cert, err := x509.CreateCertificate(rand.Reader, template, ca.caCert, &key.PublicKey, ca.caKey)
   if err != nil {
     return nil, nil, err
   }
@@ -52,7 +64,7 @@ func GenerateCACert(organization string) (privateKey, certificate []byte, err er
     SerialNumber: big.NewInt(0),
     Subject: pkix.Name{
       Organization: []string{organization},
-      OrganizationalUnit: []string{"CA"},
+      OrganizationalUnit: []string{"ErebusCertificateAuthority"},
     },
     KeyUsage : x509.KeyUsageDigitalSignature|x509.KeyUsageCertSign,
     NotBefore: time.Now(),
