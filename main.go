@@ -1,34 +1,35 @@
 package main
 
 import (
-  "net"
-  "log"
+  "os"
   "fmt"
+  "log"
+  "flag"
   "net/http"
 
-  "google.golang.org/grpc"
-  "golang.org/x/net/context"
-  pb "github.com/dreae/erebus/protobuf"
+  "github.com/dreae/erebus/lib/config"
+  rpc "github.com/dreae/erebus/lib/rpc/server"
 )
 
-type server struct{}
-
-func (s *server) DoRegister(ctx context.Context, in *pb.RegisterRequest) (*pb.RegisterResult, error) {
-  return &pb.RegisterResult{Message: "Registered: " + in.ApiKey}, nil
-}
-
 func main() {
-  lis, err := net.Listen("tcp", ":27015")
+  configPath := flag.String("c", "config.json", "Path to the config file")
+  _, err := os.Stat(*configPath)
   if err != nil {
-    log.Fatalf("Failed to listen: %v", err)
+    log.Fatal("Config file doesn't exist: ", *configPath)
+  }
+  var conf *config.Config
+  if conf, err = config.ReadConfig(*configPath); err != nil {
+    log.Fatal("Error reading config: ", err)
   }
 
-  s := grpc.NewServer()
-  pb.RegisterMasterServer(s, &server{})
-  go s.Serve(lis)
+  rpc.Init(conf)
 
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
     fmt.Fprintf(w, "Hello world")
   })
-  http.ListenAndServe(":8080", nil)
+  if conf.CertFile == "" {
+    http.ListenAndServe(fmt.Sprintf("0.0.0.0:%d", conf.WebPort), nil)
+  } else {
+    http.ListenAndServeTLS(fmt.Sprintf("0.0.0.0:%d", conf.WebPort), conf.CertFile, conf.KeyFile, nil)
+  }
 }
