@@ -1,31 +1,30 @@
-hash: 61b3c65782f0c972cf8dd07cff5ef707b7c52bfb4a49a71d76fc8947156b2a58
-updated: 2016-05-05T23:25:42.0001862-04:00
+hash: 9f255f4403caf039fc82ea3c065230f19880dde27baf6bfa55712efe4e897827
+updated: 2016-05-06T15:45:29.691908181-04:00
 imports:
+- name: github.com/dreae/colors
+  version: 91439aab60393a0718c8f43c237fed23a4585090
 - name: github.com/golang/protobuf
   version: 7cc19b78d562895b13596ddce7aafb59dd789318
   subpackages:
   - proto
   - protoc-gen-go
-  - github.com\golang\protobuf\proto
 - name: golang.org/x/net
   version: 7e42c0e1329bb108f7376a7618a2871ab90f1c4d
   subpackages:
   - context
-  - golang.org\x\net\context
-  - golang.org\x\net\http2
-  - golang.org\x\net\trace
-  - golang.org\x\net\http2\hpack
-  - golang.org\x\net\internal\timeseries
+  - http2
+  - trace
+  - http2/hpack
+  - internal/timeseries
 - name: google.golang.org/grpc
-  version: b062a3c003c22bfef58fa99d689e6a892b408f9d
+  version: 9604a2bb7dd81d87c2873a9580258465f3c311c8
   subpackages:
-  - google.golang.org\grpc
-  - google.golang.org\grpc\codes
-  - google.golang.org\grpc\credentials
-  - google.golang.org\grpc\grpclog
-  - google.golang.org\grpc\internal
-  - google.golang.org\grpc\metadata
-  - google.golang.org\grpc\naming
-  - google.golang.org\grpc\transport
-  - google.golang.org\grpc\peer
+  - codes
+  - credentials
+  - grpclog
+  - internal
+  - metadata
+  - naming
+  - transport
+  - peer
 devImports: []
