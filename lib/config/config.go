@@ -13,6 +13,7 @@ type Config struct {
   KeyFile string `json:"key"`
   WebPort int `json:"webport"`
   RPCPort int `json:"rpcport"`
+  APIKey string `json:"apiKey"`
 }
 
 // DefaultConfig generates a config containing default settings

@@ -8,8 +8,11 @@ import (
   "bufio"
   "strconv"
   "net/http"
+  "crypto/rand"
+  "encoding/pem"
   "github.com/dreae/colors"
 
+  "github.com/dreae/erebus/lib/tls"
   "github.com/dreae/erebus/lib/config"
   rpc "github.com/dreae/erebus/lib/rpc/server"
 )
@@ -66,6 +69,45 @@ func firstTimeSetup() *config.Config {
       baseConf.WebPort = port
     }
   }
+
+  fmt.Println("Generating registration token key")
+  key := make([]byte, 128)
+  if _, err := rand.Read(key); err != nil {
+    panic(err)
+  }
+  baseConf.APIKey = fmt.Sprintf("%x", key)
+
+  fmt.Println("Generating CA Certificate")
+  key, cert, err := tls.GenerateCACert("Erebus")
+  if err != nil {
+    panic(err)
+  }
+  caPath := "ca.pem"
+
+  fmt.Printf("Writing cert to %s\n", caPath)
+  certFile, err := os.OpenFile(caPath, os.O_RDWR | os.O_CREATE | os.O_TRUNC, 0666)
+  if err != nil {
+    panic(err)
+  }
+  defer certFile.Close()
+  pem.Encode(certFile, &pem.Block{
+    Type: "CERTIFICATE",
+    Bytes: cert,
+  })
+
+  keyPath := "caKey.pem"
+  fmt.Printf("Writing key to %s\n", keyPath)
+  keyFile, err := os.OpenFile(keyPath, os.O_RDWR | os.O_CREATE | os.O_TRUNC, 0600)
+  if err != nil {
+    panic(err)
+  }
+  defer keyFile.Close()
+  pem.Encode(keyFile, &pem.Block{
+    Type: "RSA PRIVATE KEY",
+    Bytes: key,
+  })
+  baseConf.CACertFile = caPath
+  baseConf.CAKeyFile = keyPath
 
   return baseConf
 }

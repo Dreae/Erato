@@ -2,3 +2,4 @@ vendor/
 *.exe
 *.pem
 config.json
+erebus
